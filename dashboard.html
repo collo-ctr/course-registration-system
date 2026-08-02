@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Course Registration</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+        }
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .header h1 {
+            color: #333;
+            font-size: 24px;
+        }
+        .header .user-info {
+            color: #666;
+        }
+        .header .user-info strong {
+            color: #333;
+        }
+        .header a {
+            color: #667eea;
+            text-decoration: none;
+            margin-left: 15px;
+            font-weight: 600;
+        }
+        .header a:hover { text-decoration: underline; }
+        
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        .card h2 {
+            color: #333;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .course-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 10px;
+            border-bottom: 1px solid #eee;
+            transition: background 0.2s;
+        }
+        .course-item:hover {
+            background: #f8f9fa;
+        }
+        .course-item:last-child { border-bottom: none; }
+        
+        .course-info h4 {
+            color: #333;
+            font-size: 15px;
+        }
+        .course-info p {
+            color: #888;
+            font-size: 13px;
+            margin-top: 2px;
+        }
+        
+        .btn {
+            padding: 6px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .btn-register {
+            background: #28a745;
+            color: white;
+        }
+        .btn-register:hover {
+            background: #218838;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+        .btn-drop {
+            background: #dc3545;
+            color: white;
+        }
+        .btn-drop:hover {
+            background: #c82333;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        }
+        .btn-details {
+            background: #17a2b8;
+            color: white;
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        .btn-details:hover {
+            background: #138496;
+            box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
+        }
+        .btn-view {
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            margin-top: 15px;
+            display: inline-block;
+        }
+        .btn-view:hover {
+            background: #5a67d8;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .empty-message {
+            color: #888;
+            padding: 20px 0;
+            text-align: center;
+            font-size: 14px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 2px 10px;
+            background: #28a745;
+            color: white;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .flash-messages {
+            margin-bottom: 20px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .flash {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        .flash.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .flash.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .flash.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        .flash.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .course-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h1>Course Registration System</h1>
+            <span class="user-info">Welcome, <strong>{{ user.name }}</strong> ({{ user.email }})</span>
+        </div>
+        <div>
+            <a href="{{ url_for('registration.view_registered') }}">My Courses</a>
+            <a href="{{ url_for('auth.logout') }}">Logout</a>
+        </div>
+    </div>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+    
+    <div class="container">
+        <!-- Available Courses -->
+        <div class="card">
+            <h2>📋 Available Courses</h2>
+            {% if courses %}
+                {% for course in courses %}
+                    <div class="course-item">
+                        <div class="course-info">
+                            <h4>{{ course.code }} - {{ course.name }}</h4>
+                            <p>Credits: {{ course.credits }} | 
+                               {{ course.enrolled }}/{{ course.capacity }} enrolled
+                               {% if course.is_full() %}
+                                   <span style="color: #dc3545;">(Full)</span>
+                               {% endif %}
+                            </p>
+                        </div>
+                        <div class="course-actions">
+                            <a href="{{ url_for('dashboard.course_details', course_id=course.id) }}" 
+                               class="btn btn-details">Details</a>
+                            {% if not course.is_full() %}
+                                <a href="{{ url_for('registration.register_course', course_id=course.id) }}" 
+                                   class="btn btn-register">Register</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="empty-message">No courses available.</p>
+            {% endif %}
+        </div>
+        
+        <!-- Registered Courses -->
+        <div class="card">
+            <h2>My Registered Courses 
+                <span class="badge">{{ registered|length }}</span>
+            </h2>
+            {% if registered %}
+                {% for course in registered %}
+                    <div class="course-item">
+                        <div class="course-info">
+                            <h4>{{ course.code }} - {{ course.name }}</h4>
+                            <p>Credits: {{ course.credits }}</p>
+                        </div>
+                        <div class="course-actions">
+                            <a href="{{ url_for('dashboard.course_details', course_id=course.id) }}" 
+                               class="btn btn-details">Details</a>
+                            <a href="{{ url_for('registration.drop_course', course_id=course.id) }}" 
+                               class="btn btn-drop"
+                               onclick="return confirm('Drop {{ course.name }}?')">Drop</a>
+                        </div>
+                    </div>
+                {% endfor %}
+                <div style="margin-top: 15px; text-align: center;">
+                    <a href="{{ url_for('registration.view_registered') }}" class="btn btn-view">
+                        View All Registered Courses
+                    </a>
+                </div>
+            {% else %}
+                <p class="empty-message">You haven't registered for any courses yet.</p>
+                <div style="text-align: center; margin-top: 10px;">
+                    <p style="color: #888; font-size: 13px;">Browse available courses and register!</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
